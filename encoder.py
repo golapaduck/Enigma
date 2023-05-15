@@ -1,18 +1,18 @@
 import random
 
 #아스키코드에서 65~90: 대문자, 97~122: 소문자
+# 원하는 table 모양notch는 회전자 목적, value는 변환목적
 
-#notch는 회전자 목적, value는 변환목적
-tables =[
-    {'value':'EKMFLGDQVZNTOWYHXUSPAIBRCJ','notch':1},
-    {'value':'AJDKSIRUXBLHWTMCQGZNPYFVOE','notch':3},
-    {'value':'BDFHJLCPRTXVZNYEIWGAKMUSQO','notch':9},
-    {'value':'ESOVPZJAYQUIRHXLNFTGKDCMWB','notch':7},
-    {'value':'VZBRGITYUPSDNHLXAWMJQOFECK','notch':8},
-    {'value':'JPGVOUMFYQBENHZRDKASXLICTW','notch':4},
-    {'value':'NZJHGRCXMYSWBOUFAIVLPEKQDT','notch':6},
-    {'value':'FKQHTLXOCBJSPDZRAMEWNIUYGV','notch':2}
-]
+# tables =[
+#     {'value':'EKMFLGDQVZNTOWYHXUSPAIBRCJ','notch':1},
+#     {'value':'AJDKSIRUXBLHWTMCQGZNPYFVOE','notch':3},
+#     {'value':'BDFHJLCPRTXVZNYEIWGAKMUSQO','notch':9},
+#     {'value':'ESOVPZJAYQUIRHXLNFTGKDCMWB','notch':7},
+#     {'value':'VZBRGITYUPSDNHLXAWMJQOFECK','notch':8},
+#     {'value':'JPGVOUMFYQBENHZRDKASXLICTW','notch':4},
+#     {'value':'NZJHGRCXMYSWBOUFAIVLPEKQDT','notch':6},
+#     {'value':'FKQHTLXOCBJSPDZRAMEWNIUYGV','notch':2}
+# ]
 
 
 def parser(key):
@@ -25,7 +25,7 @@ def parser(key):
 
     return key_list
 
-#setting: 회전판 순서, 회전판 초기 세팅, [플러그보드 설정] 
+#setting: 회전판 순서, 회전판 초기 세팅, [플러그보드 설정]
 
 def encoding(msg, setting):
     #key 리스트화
@@ -48,5 +48,25 @@ def encoding(msg, setting):
     
     print(data)
 
+def Setting():
 
-encoding('test Text',1)
+    tables = list()
+    f = open('./tables.txt','r')
+    
+
+    while(True):
+        line = f.readline()
+        if not line:
+            break
+
+        table ={
+            'value': line.split()[0],
+            'notch': line.split()[1]
+        }
+
+        tables.append(table)
+    f.close()
+    return tables
+
+#encoding('test Text',1)
+print(Setting())
