@@ -1,4 +1,5 @@
 import random
+import string
 
 #아스키코드에서 65~90: 대문자, 97~122: 소문자
 # 원하는 table 모양notch는 회전자 목적, value는 변환목적
@@ -27,8 +28,53 @@ def parser(key):
 
 #setting: 회전판 순서, 회전판 초기 세팅, [플러그보드 설정]
 
+def Setting(plugNum=False):
+    #table 세팅
+    tables = list()
+    f = open('./tables.txt','r')
+    
+
+    while(True):
+        line = f.readline()
+        if not line:
+            break
+
+        table ={
+            'value': line.split()[0],
+            'notch': line.split()[1]
+        }
+
+        tables.append(table)
+    f.close()
+    
+    #roter 세팅
+    roter = list()
+
+    for i in range(3):
+        order= random.randint(1,8) #중복 생길 수 있음
+        prime= random.randint(1,25)
+        roter.append({'order':order, 'prime': prime})
+
+    #plug 세팅
+    plug = list()
+
+    if(plugNum > 0):
+        rand = random.sample(string.ascii_uppercase,plugNum*2)
+        for i in range(plugNum):
+            plug.append(''.join(s for s in rand[i*2:i*2+2]))
+    
+
+    setting ={
+        'tables': tables,
+        'roter': roter,
+        'plug': plug,
+    }
+
+    return setting
+
+
 def encoding(msg, setting):
-    #key 리스트화
+    
     roters = parser(roter)
     data = list(msg)
 
@@ -48,25 +94,6 @@ def encoding(msg, setting):
     
     print(data)
 
-def Setting():
-
-    tables = list()
-    f = open('./tables.txt','r')
-    
-
-    while(True):
-        line = f.readline()
-        if not line:
-            break
-
-        table ={
-            'value': line.split()[0],
-            'notch': line.split()[1]
-        }
-
-        tables.append(table)
-    f.close()
-    return tables
 
 #encoding('test Text',1)
-print(Setting())
+print(Setting(2))
