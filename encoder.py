@@ -40,8 +40,8 @@ def Setting(plugNum=False):
             break
 
         table ={
-            'value': line.split()[0],
-            'notch': line.split()[1]
+            'value': line.split(',')[0],
+            'notch': line.split(',')[1]
         }
 
         tables.append(table)
@@ -49,21 +49,24 @@ def Setting(plugNum=False):
     
     #roter 세팅
     roter = list()
+    buffer =list()
 
     for i in range(3):
-        order= random.randint(1,8) #중복 생길 수 있음
-        prime= random.randint(1,25)
+        order = random.randint(1,8)
+        while(order in buffer):
+            order = random.randint(1,8)
+        buffer.append(order)
+
+        prime= random.randint(1,26)
         roter.append({'order':order, 'prime': prime})
 
     #plug 세팅
     plug = list()
 
     if(plugNum > 0):
-        rand = random.sample(string.ascii_uppercase,plugNum*2)
-        for i in range(plugNum):
-            plug.append(''.join(s for s in rand[i*2:i*2+2]))
-    
+        plug = random.sample(string.ascii_uppercase,plugNum*2)
 
+    #setting 선언
     setting ={
         'tables': tables,
         'roter': roter,
@@ -72,10 +75,37 @@ def Setting(plugNum=False):
 
     return setting
 
+def toKey(setting):
+    roters = setting['roter']
+    plugs = setting['plug']
+
+    origin = 0
+    for roter in roters:
+        origin = origin*1000 + roter['order']*100 + roter['prime']
+
+    key = str(hex(origin)).lstrip('0x')
+
+    if(len(key) <8):
+        key = '0' + key
+
+    origin = str()
+
+    if(len(plugs) != 0):
+        for plug in plugs:
+            index = ord(plug) - 65
+            if(index < 10):
+                origin = origin + '0' + str(index)
+            else:
+                origin = origin + str(index)
+
+        key = key + str(hex(int(origin))).lstrip('0x')
+    
+    return key
+
 
 def encoding(msg, setting):
-    
-    roters = parser(roter)
+
+
     data = list(msg)
 
     for roter in roters:
@@ -96,4 +126,4 @@ def encoding(msg, setting):
 
 
 #encoding('test Text',1)
-print(Setting(2))
+print(Setting(1))
