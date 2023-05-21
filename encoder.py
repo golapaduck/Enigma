@@ -3,29 +3,9 @@ import string
 
 #아스키코드에서 65~90: 대문자
 # ' '는 27번째, .은 28번째
-# 원하는 table 모양notch는 회전자 목적, value는 변환목적
+# 원하는 table 모양 notch는 회전자 목적, value는 변환목적
 
-# tables =[
-#     {'value':'EKMFLGDQVZNTOWYHXUSPAIBRCJ','notch':1},
-#     {'value':'AJDKSIRUXBLHWTMCQGZNPYFVOE','notch':3},
-#     {'value':'BDFHJLCPRTXVZNYEIWGAKMUSQO','notch':9},
-#     {'value':'ESOVPZJAYQUIRHXLNFTGKDCMWB','notch':7},
-#     {'value':'VZBRGITYUPSDNHLXAWMJQOFECK','notch':8},
-#     {'value':'JPGVOUMFYQBENHZRDKASXLICTW','notch':4},
-#     {'value':'NZJHGRCXMYSWBOUFAIVLPEKQDT','notch':6},
-#     {'value':'FKQHTLXOCBJSPDZRAMEWNIUYGV','notch':2}
-# ]
-
-
-def parser(key):
-    key_list = list()
-    key_data = key
-    
-    while(key_data > 0):
-        key_list.append(key_data%10)
-        key_data = key_data //10
-
-    return key_list
+ref  = list('.RGEDYCUXZTSNMV WBLKHOQIFJPA')
 
 #setting: 회전판 순서, 회전판 초기 세팅, [플러그보드 설정]
 
@@ -40,8 +20,10 @@ def setting(plugNum=False):
         if not line:
             break
 
+        value = list(line.split(',')[0])
+
         table ={
-            'value': line.split(',')[0],
+            'value': value,
             'notch': line.split(',')[1]
         }
 
@@ -60,6 +42,11 @@ def setting(plugNum=False):
 
         prime= random.randint(1,28)
         roter.append({'order':order, 'prime': prime})
+
+    # test용
+    # roter.append({'order': 8,'prime':23})
+    # roter.append({'order': 3,'prime':3})
+    # roter.append({'order': 5,'prime':1})
 
     #plug 세팅
     plug = list()
@@ -121,7 +108,7 @@ def plugBoard(msg, plug):
         count = count + 1
     
     return data
-
+#회전자 대입
 def roterFunc(word,table):
     data = word
     buffer = table
@@ -135,6 +122,64 @@ def roterFunc(word,table):
         data = buffer[index]
     return data
 
+#회전자 회전
+def notchFunc(table):
+    old_table  = table
+    new_table = list()
+
+    
+    for roter in old_table:
+        rachet = roter['notch']
+        first = roter['value'][0]
+
+        buffer = roter['value']
+        buffer.insert(0,buffer.pop())
+
+        ready = {'value': buffer, 'notch' : rachet}
+
+        new_table.append(ready)
+        
+        if(rachet != first):
+            break
+        else:
+            continue
+
+    count = 0
+
+    for roter in new_table:
+        old_table[count] = roter
+        count = count + 1
+
+    return old_table
+
+def reverseFunc(table):
+    old = table['value']
+    notch = table['notch']
+    val= list(0 for i in range(0,28))
+
+    count = 65
+    for value in old:
+        
+        if(value == ' '):
+            buffer = 26
+        elif(value == '.'):
+            buffer = 27
+        else:
+            buffer = ord(value) - 65
+        
+        if(count<=90):
+            val[buffer] = chr(count)
+        elif(count == 91):
+            val[buffer] = ' '
+        elif(count == 92):
+            val[buffer] = '.'
+
+        count  = count +1
+    
+    new = {'value':val, 'notch': notch}
+
+    return new
+
 def mech(msg,tables,roters):
     use = list()
     data = msg
@@ -142,7 +187,7 @@ def mech(msg,tables,roters):
     #use 리스트에 초기값 저장
     for roter in roters:
         index = roter['order'] - 1
-        buffer = list(tables[index]['value'])
+        buffer = tables[index]['value']
         
         #notch를 찾기 편하게 알파벳으로 치환
         notch = tables[index]['notch']
@@ -152,7 +197,7 @@ def mech(msg,tables,roters):
         for i in range(roter['prime']):
             buffer.insert(0,buffer.pop())
 
-        ready = {'table':buffer, 'notch': no_char}
+        ready = {'value':buffer, 'notch': no_char}
 
         use.append(ready)
 
@@ -164,33 +209,48 @@ def mech(msg,tables,roters):
     for word in code:
         newWord = word
 
+        #회전자
         for table in use:
-            newWord = roterFunc(newWord, table['table'])
+            newWord = roterFunc(newWord, table['value'])
+
+        #반사판
+        newWord = roterFunc(newWord,ref)
+
+        #회전자 역방향
+        rev_use = reversed(use)
+
+        for table in rev_use:
+            rev_table = reverseFunc(table)
+            newWord = roterFunc(newWord, rev_table['value'])
         
         new.append(newWord)
-        
-        
+
+        use = notchFunc(use)
 
     code = new
 
 
-    data = ''.join(s for s in code)
+    data = code
 
     return data
         
 def encoding(msg, setting):
-    
+
     set = setting
     data = list(msg)
-    
-    #print(set)
 
-    data = plugBoard(data,set['plug'])
+    print(set['roter'])
+    print(set['plug'])
 
-    print(mech(msg, set['table'],set['roter']))
+    # data = plugBoard(data,set['plug'])
 
-    #return ''.join(s for s in data)
+    data = mech(data, set['table'],set['roter'])
 
-code = encoding('HELLO',setting(4))
+    # data = plugBoard(data,set['plug'])
+
+    return ''.join(s for s in data)
+
+code = encoding('HELLO',setting(0))
+
 
 print(code)
