@@ -8,7 +8,6 @@ import string
 ref  = list('.RGEDYCUXZTSNMV WBLKHOQIFJPA')
 
 #setting: 회전판 순서, 회전판 초기 세팅, [플러그보드 설정]
-
 def setting(plugNum=False):
     #table 세팅
     tables = list()
@@ -44,9 +43,9 @@ def setting(plugNum=False):
         roter.append({'order':order, 'prime': prime})
 
     # test용
-    # roter.append({'order': 8,'prime':23})
-    # roter.append({'order': 3,'prime':3})
-    # roter.append({'order': 5,'prime':1})
+    # roter.append({'order': 4,'prime':10})
+    # roter.append({'order': 6,'prime':10})
+    # roter.append({'order': 3,'prime':27})
 
     #plug 세팅
     plug = list()
@@ -65,6 +64,7 @@ def setting(plugNum=False):
 
     return setting
 
+#setting값을 key형태로 암호화
 def toKey(setting):
     roters = setting['roter']
     plugs = setting['plug']
@@ -92,6 +92,12 @@ def toKey(setting):
     
     return key
 
+def toSet(key):
+    #key를 앞 8개와 나머지로 쪼개고, 각각 10진법화 한다. 그 이후 앞 8자리는 그대로 회전자 데이터, 뒤에 남은 데이터는 그대로 플러그보드값
+    set = []
+    
+    return set 
+#플러그보드 대입
 def plugBoard(msg, plug):
     count = 0
     plugs = plug
@@ -108,6 +114,7 @@ def plugBoard(msg, plug):
         count = count + 1
     
     return data
+
 #회전자 대입
 def roterFunc(word,table):
     data = word
@@ -152,6 +159,7 @@ def notchFunc(table):
 
     return old_table
 
+#반사된 회전자
 def reverseFunc(table):
     old = table['value']
     notch = table['notch']
@@ -180,6 +188,7 @@ def reverseFunc(table):
 
     return new
 
+#회전자 메카니즘
 def mech(msg,tables,roters):
     use = list()
     data = msg
@@ -191,7 +200,7 @@ def mech(msg,tables,roters):
         
         #notch를 찾기 편하게 알파벳으로 치환
         notch = tables[index]['notch']
-        no_char = buffer[int(notch)]
+        no_char = buffer[int(notch)-1]
 
         #prime 값으로 table 재구축
         for i in range(roter['prime']):
@@ -229,18 +238,16 @@ def mech(msg,tables,roters):
 
     code = new
 
+    return code
 
-    data = code
-
-    return data
-        
+#인코딩(플러그보드 + 회전자 + 반사판)
 def encoding(msg, setting):
 
     set = setting
     data = list(msg)
 
-    print(set['roter'])
-    print(set['plug'])
+    print(set)
+    # print(set['plug'])
 
     # data = plugBoard(data,set['plug'])
 
@@ -250,7 +257,9 @@ def encoding(msg, setting):
 
     return ''.join(s for s in data)
 
-code = encoding('HELLO',setting(0))
+set = setting(0)
 
+code = encoding('LOVE',set)
 
+print(toKey(set))
 print(code)
