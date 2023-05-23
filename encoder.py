@@ -274,7 +274,7 @@ def mech(msg,tables,roters):
 #인코딩(플러그보드 + 회전자 + 반사판)
 def encoding(msg, key=False):
 
-    if(key):
+    if(key != False):
         set = key
     else:
         set = setting(plugNum=1)
