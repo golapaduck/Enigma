@@ -272,9 +272,12 @@ def mech(msg,tables,roters):
     return code
 
 #인코딩(플러그보드 + 회전자 + 반사판)
-def encoding(msg, setting):
+def encoding(msg, key=False):
 
-    set = setting
+    if(key):
+        set = key
+    else:
+        set = setting(plugNum=1)
     data = list(msg)
 
     # print(set)
@@ -287,19 +290,17 @@ def encoding(msg, setting):
 
     return ''.join(s for s in data)
 
-msg = 'KIM CHANG HO'
+#예시
+# msg = 'KIM CHANG HO'
+# print(msg + '를 변환합니다.')
 
+# set = setting(plugNum=1)
+# code = encoding(msg, set)
+# print('========암호화 결과========')
+# print('키= ' + toKey(set))
+# print('암호문= ' + code)
 
-print(msg + '를 변환합니다.')
+# test_code = encoding(code,setting(key = toKey(set)))
 
-
-set = setting(plugNum=1)
-code = encoding(msg,set)
-print('========암호화 결과========')
-print('키= ' + toKey(set))
-print('암호문= ' + code)
-
-test_code = encoding(code,setting(key = toKey(set)))
-
-print('========복호화 결과========')
-print('문장= ' + test_code)
+# print('========복호화 결과========')
+# print('문장= ' + test_code)
