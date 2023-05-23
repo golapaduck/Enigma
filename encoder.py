@@ -288,7 +288,12 @@ def encoding(msg, key=False):
 
     data = plugBoard(data,set['plug'])
 
-    return ''.join(s for s in data)
+    value= ''.join(s for s in data)
+    code_key = toKey(set)
+
+    code = (value+'/'+code_key)
+
+    return code
 
 #예시
 # msg = 'KIM CHANG HO'
@@ -297,10 +302,11 @@ def encoding(msg, key=False):
 # set = setting(plugNum=1)
 # code = encoding(msg, set)
 # print('========암호화 결과========')
-# print('키= ' + toKey(set))
 # print('암호문= ' + code)
 
-# test_code = encoding(code,setting(key = toKey(set)))
+# msg = list(code.split('/'))
+
+# test_code = encoding(msg[0],setting(key = msg[1]))
 
 # print('========복호화 결과========')
 # print('문장= ' + test_code)
