@@ -94,8 +94,21 @@ def toKey(setting):
 
 def toSet(key):
     #key를 앞 8개와 나머지로 쪼개고, 각각 10진법화 한다. 그 이후 앞 8자리는 그대로 회전자 데이터, 뒤에 남은 데이터는 그대로 플러그보드값
+    roter_key = key[0:8]
+    plug_key = key[8:]
+    roter_list = list()
+    plug_list =list()
     set = []
     
+    roter = str(int(roter_key,base=16))
+    if(plug_key):
+        plug = int(plug_key,base=16)
+    
+    for i in range(0,3):
+        buffer = roter[i*3:(i+1)*3]
+        roter_list.append({'order': buffer[0],'prime': buffer[1:3]})
+    set.append({'roter':roter_list})
+    set.append({'plug':plug_list})
     return set 
 #플러그보드 대입
 def plugBoard(msg, plug):
@@ -263,3 +276,5 @@ code = encoding('LOVE',set)
 
 print(toKey(set))
 print(code)
+
+print(toSet('1e8df139'))
