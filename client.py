@@ -15,6 +15,6 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             continue
         s.sendall(msg.encode('utf-8'))
         data = s.recv(1024).decode('utf-8')
-        print(f'서버:{data}')
+        print(f'\n서버){data}')
         if data == "종료":
             break

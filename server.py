@@ -44,6 +44,6 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                     conn.close()
                     readsocks.remove(conn)  # 클라이언트 접속 해제시 readsocks에서 제거
                 elif key != '':
-                    conn.sendall(('결과:' + encoder.encoding(code,key = key)).encode('utf-8'))
+                    conn.sendall(('복호화 결과:' + encoder.encoding(code,key = key)).encode('utf-8'))
                 elif code:
-                    conn.sendall(('결과:' + encoder.encoding(code)).encode('utf-8'))
+                    conn.sendall(('암호화 결과:' + encoder.encoding(code)).encode('utf-8'))
