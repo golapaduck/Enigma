@@ -7,12 +7,14 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     s.connect((HOST, PORT))
 
     while True:
-        n = input("1-9 사이의 숫자를 입력하세요(0은 게임포기):")
-        if not n.strip():
+        msg = input("문장을 입력하세요:")
+        if(msg.find('/') == -1):
+            msg = msg+'/'
+        if not msg.strip():
             print("입력값이 잘못되었습니다.")
             continue
-        s.sendall(n.encode('utf-8'))
+        s.sendall(msg.encode('utf-8'))
         data = s.recv(1024).decode('utf-8')
-        print(f'서버응답:{data}')
-        if data == "정답" or data == "종료":
+        print(f'서버:{data}')
+        if data == "종료":
             break

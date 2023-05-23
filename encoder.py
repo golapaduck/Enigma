@@ -275,7 +275,7 @@ def mech(msg,tables,roters):
 def encoding(msg, key=False):
 
     if(key != False):
-        set = key
+        set = setting(key,1)
     else:
         set = setting(plugNum=1)
     data = list(msg)
