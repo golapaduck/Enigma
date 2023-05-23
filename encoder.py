@@ -8,7 +8,7 @@ import string
 ref  = list('.RGEDYCUXZTSNMV WBLKHOQIFJPA')
 
 #setting: 회전판 순서, 회전판 초기 세팅, [플러그보드 설정]
-def setting(plugNum=False):
+def setting(key=False,plugNum=False):
     #table 세팅
     tables = list()
     f = open('./tables.txt','r')
@@ -29,31 +29,36 @@ def setting(plugNum=False):
         tables.append(table)
     f.close()
     
+    if(key):
+        roter = toSet(key)['roter']
+        plug = toSet(key)['plug']
+    
+    else:
     #roter 세팅
-    roter = list()
-    buffer =list()
+        roter = list()
+        buffer =list()
 
-    for i in range(3):
-        order = random.randint(1,8)
-        while(order in buffer):
+        for i in range(3):
             order = random.randint(1,8)
-        buffer.append(order)
+            while(order in buffer):
+                order = random.randint(1,8)
+            buffer.append(order)
 
-        prime= random.randint(1,28)
-        roter.append({'order':order, 'prime': prime})
+            prime= random.randint(1,28)
+            roter.append({'order':order, 'prime': prime})
 
-    # test용
-    # roter.append({'order': 4,'prime':10})
-    # roter.append({'order': 6,'prime':10})
-    # roter.append({'order': 3,'prime':27})
+        # test용
+        # roter.append({'order': 4,'prime':10})
+        # roter.append({'order': 6,'prime':10})
+        # roter.append({'order': 3,'prime':27})
 
-    #plug 세팅
-    plug = list()
+        #plug 세팅
+        plug = list()
 
-    if(14 > plugNum > 0):
-        plug = random.sample(string.ascii_uppercase,plugNum*2)
-    elif(plugNum > 13):
-        plug = random.sample(string.ascii_uppercase,26)
+        if(14 > plugNum > 0):
+            plug = random.sample(string.ascii_uppercase,plugNum*2)
+        elif(plugNum > 13):
+            plug = random.sample(string.ascii_uppercase,26)
 
     #setting 선언
     setting ={
@@ -98,17 +103,30 @@ def toSet(key):
     plug_key = key[8:]
     roter_list = list()
     plug_list =list()
-    set = []
     
     roter = str(int(roter_key,base=16))
-    if(plug_key):
-        plug = int(plug_key,base=16)
     
     for i in range(0,3):
         buffer = roter[i*3:(i+1)*3]
-        roter_list.append({'order': buffer[0],'prime': buffer[1:3]})
-    set.append({'roter':roter_list})
-    set.append({'plug':plug_list})
+        roter_list.append({'order': int(buffer[0]),'prime': int(buffer[1:3])})
+
+    if(plug_key):
+        plug = str(int(plug_key,base=16))
+
+        if(len(plug)%2 == 1):
+            plug = '0'+plug
+
+        for i in range(0,len(plug)//2):
+            buffer = int(plug[i*2:(i+1)*2]) + 65
+            
+            plug_list.append(chr(buffer))
+
+    
+
+    set = {
+        'roter': roter_list,
+        'plug': plug_list
+    }
     return set 
 #플러그보드 대입
 def plugBoard(msg, plug):
@@ -259,22 +277,29 @@ def encoding(msg, setting):
     set = setting
     data = list(msg)
 
-    print(set)
-    # print(set['plug'])
+    # print(set)
 
-    # data = plugBoard(data,set['plug'])
+    data = plugBoard(data,set['plug'])
 
     data = mech(data, set['table'],set['roter'])
 
-    # data = plugBoard(data,set['plug'])
+    data = plugBoard(data,set['plug'])
 
     return ''.join(s for s in data)
 
-set = setting(0)
+msg = 'KIM CHANG HO'
 
-code = encoding('LOVE',set)
 
-print(toKey(set))
-print(code)
+print(msg + '를 변환합니다.')
 
-print(toSet('1e8df139'))
+
+set = setting(plugNum=1)
+code = encoding(msg,set)
+print('========암호화 결과========')
+print('키= ' + toKey(set))
+print('암호문= ' + code)
+
+test_code = encoding(code,setting(key = toKey(set)))
+
+print('========복호화 결과========')
+print('문장= ' + test_code)
