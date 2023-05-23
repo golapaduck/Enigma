@@ -39,7 +39,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                     conn.sendall(f'입력값이 올바르지 않습니다:{data}'.encode('utf-8'))
                     continue
 
-                if code == '0' and key =='':
+                if code == '0' or code == '종료' and key =='':
                     conn.sendall(f"종료".encode('utf-8'))
                     conn.close()
                     readsocks.remove(conn)  # 클라이언트 접속 해제시 readsocks에서 제거
