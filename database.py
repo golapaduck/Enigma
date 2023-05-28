@@ -59,5 +59,4 @@ def fileWriter(text):
             data = text[i]
             f.write(f'{data}\n')
 
-
-fileWriter(['FSIQ/3115c27445a'])
+# print(fileReader())
