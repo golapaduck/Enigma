@@ -3,17 +3,18 @@ import os
 
 
 def today():
-    timeData =  time.localtime()
+    t =  time.localtime()
 
-    date = f'{timeData.tm_year}-{timeData.tm_mon}-{timeData.tm_mday}'
+    date = '{:04}-{:02}-{:02}'.format(t.tm_year,t.tm_mon,t.tm_mday)
 
     return date
 
-def fileManager(path):
+
+def getDate(path):
     fileList = os.listdir(path)
     txtList = list(file for file in fileList if 'tables' not in file)
 
-    codeList = list()
+    codeList = dict()
 
     for name in txtList:
         filePath = f'{path}/{name}'
@@ -26,15 +27,37 @@ def fileManager(path):
                 line = f.readline()
                 if not line:
                     break
+                # 라인별 \n 삭제 후 추가
+                lines.append(line.split('\n')[0])
 
-                lines.append(line)
                 
-        code = {name: lines}
-        codeList.append(code)
+        code = {name[0:10]: lines}
+        codeList.update(code)
+
+    return codeList
+
+def fileReader():
+    dataList = getDate('./database')
+
+    dataKey = dataList.keys()
+    date = today()
+    
+    new = list()
+    old = dict()
+    for key in dataKey:
+        if key == date:
+            new = dataList[key]
+        else:
+            old.update({key:dataList[key]})
+    return {'new':new, 'old':old}
+
+def fileWriter(text):
+    filePath = f'./database/{today()}.txt'
+    
+    with open(filePath,'w') as f:
+        for i in range(0,len(text)):
+            data = text[i]
+            f.write(f'{data}\n')
 
 
-
-    return txtList
-
-
-print(fileManager('./database'))
+fileWriter(['FSIQ/3115c27445a'])
