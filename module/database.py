@@ -42,13 +42,17 @@ def fileReader():
     dataKey = dataList.keys()
     date = today()
     
-    new = list()
+    new = dict()
     old = dict()
     for key in dataKey:
         if key == date:
-            new = dataList[key]
+            new.update({'value':dataList[key]})
+            new.update({'date':key})
         else:
             old.update({key:dataList[key]})
+    if new == {}:
+        new.update({'date':today()})
+        new.update({'value':list()})
     return {'new':new, 'old':old}
 
 def fileWriter(text):

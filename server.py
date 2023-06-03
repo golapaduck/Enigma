@@ -1,70 +1,121 @@
 import socket
-import select
-import encoder
+import signal
+import threading
+
+import module.database as db
+import module.encoder as en
 
 HOST = ''
 PORT = 9150
 MODE = [0,1,2]
 
-with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-    s.bind((HOST, PORT))
-    s.listen()
-    print('서버가 시작되었습니다.')
 
-    readsocks = [s]
-    ids = {}
-    id = 1
-    code_list = []
+code_list = db.fileReader()
+new = code_list['new']
+
+ids = list()
+
+def upload(conn, id):
+    print(f'user{id}: 업로드')
 
     while True:
-        readables, writeables, excpetions = select.select(readsocks, [], [])
-        for sock in readables:
-            if sock == s:  # 신규 클라이언트 접속
-                newsock, addr = s.accept()
-                print(f'클라이언트가 접속했습니다:{addr}, id는 {id} 입니다.')
-                readsocks.append(newsock)
-                ids[newsock] = id  # 클라이언트 별 id 배정
-                id = id + 1
-            else:  # 이미 접속한 클라이언트의 요청
-                conn = sock
-                code = conn.recv(1024).decode('utf-8')
-                print(f'user{ids[conn]}: {code}')
+        data = conn.recv(1024).decode('utf-8')
+        try:
+            data = data.upper()
+            msg = en.encoding(data)
+            conn.sendall(msg.encode('utf-8'))
+            new['value'].append(msg)
+            print(f'user{id}: 업로드 {msg}')
+            db.fileWriter(new['value'])
+            print(f'데이터 저장...')
+                        
+            break
+        except:
+            conn.sendall(f'재송신/'.encode('utf-8'))
+            continue
 
-                if code == '0' or code == '종료':
-                    conn.sendall(f"종료".encode('utf-8'))
-                    print(f'user{ids[conn]} 종료')
-                    conn.close()
-                    readsocks.remove(conn)  # 클라이언트 접속 해제시 readsocks에서 제거
+def download(conn,id):
 
-                elif code == '1' or code == '업로드':
-                    conn.sendall(f"업로드".encode('utf-8'))
-                    
-                    while True:
-                        data = conn.recv(1024).decode('utf-8')
-                        try:
-                            data = data.upper()
-                            msg = encoder.encoding(data)
-                            conn.sendall(msg.encode('utf-8'))
-                            code_list.append(msg)
-                            break
-                        except:
-                            conn.sendall(f'재송신/'.encode('utf-8'))
-                            continue    
+    dateList = list(code_list['old'].keys())
+    days = ""
+    for date in dateList:
+        days += f"{date +'/'}"
+    days +=f"{new['date']}"
+    conn.sendall(f'{days}'.encode('utf-8'))
+    print(f'user{id}: 다운로드')
+
+    setDate = conn.recv(1024).decode('utf-8')
+    
+    if setDate in list(code_list['old'].keys()):
+        dataList = code_list['old'][setDate]
+        codes = len(dataList)
+    elif setDate == new['date']:
+        dataList = code_list['new']['value']
+        codes =  len(dataList)
+    
+    conn.sendall(str(codes).encode('utf-8'))
+        
+    index = conn.recv(1024).decode('utf-8')
+    
+    conn.sendall(f"{dataList[int(index)]}".encode('utf-8'))
+    print(f"user{id}: 다운로드 {dataList[int(index)]}")
+    
+def runClient(conn,id):
+    print(f"user{id}가 접속하였습니다.")
+    while True:
+        code_list = db.fileReader()
+        new = code_list['new']
+        
+        try:
+            code = conn.recv(1024).decode('utf-8')
+        except ConnectionResetError:
+            print(f'user{id}가 강제로 종료되었습니다.')
+            break
+        else:
+            if code == '0' or code == '종료':
+                print(f'user{id} 종료')
+                break
                 
-                elif code == '2' or code == '다운로드':
-                    conn.sendall(f"다운로드 {len(code_list)}".encode('utf-8'))
-                    
-                    if(len(code_list) == 0):
-                        break
-                    index = conn.recv(1024).decode('utf-8')
+            elif code == '1' or code == '업로드':
+                t= threading.Thread(target=upload,args=(conn,id))
+                t.daemon = True
+                t.start()
+                t.join()
+                
+            elif code == '2' or code == '다운로드':
+                t= threading.Thread(target=download,args=(conn,id))
+                t.daemon = True
+                t.start()
+                t.join()
 
-                    try:
-                        conn.sendall(f"{code_list.pop(index - 1)}".encode('utf-8'))
+    if conn in ids:
+        ids.remove(conn)
+        
+    conn.close()
+    db.fileWriter(new['value'])
+    print(f'데이터 저장...')
 
-                    except:
-                        conn.sendall(f"{code_list.pop(0)}".encode('utf-8'))
-                    continue
+def main():
+    
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        
+        s.bind((HOST, PORT))
+        s.listen(5)
+        print('서버가 시작되었습니다.')
 
-                else:
-                    conn.sendall(f'재송신'.encode('utf-8'))
-                    continue
+        while True:
+            conn,addr = s.accept()
+            ids.append(conn)
+            id = len(ids)-1
+            t= threading.Thread(target=runClient,args=(conn,id))
+            t.daemon = True
+            t.start()
+            
+            t.join()
+            
+            if(len(ids)==0):
+                print('서버를 종료합니다.')
+                break
+
+if __name__ == "__main__":
+    main()
