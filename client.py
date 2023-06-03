@@ -45,6 +45,7 @@ def download(data):
             continue
 
     s.sendall(setDate.encode('utf-8'))
+    print('---------------------------')
     
     codes = s.recv(1024).decode('utf-8')
     print(f'총 {codes}개의 암호가 있습니다.')
@@ -58,7 +59,8 @@ def download(data):
             break
         else:
             print("다시 입력해주세요.")
-    s.sendall(str(index).encode('utf-8'))
+            
+    s.sendall(f"{index}".encode('utf-8'))
 
     txt = list(s.recv(1024).decode('utf-8').split('/'))
             
@@ -78,8 +80,9 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         msg = input('입력: ')
         print('---------------------------')
 
-        s.sendall(msg.encode('utf-8'))
 
+        s.sendall(msg.encode('utf-8'))
+        
         if msg == "0":
             print('서버)종료합니다.')
             print('---------------------------')
@@ -100,3 +103,4 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         else:
             print('다시 입력해주세요.')
             continue
+    

@@ -1,5 +1,5 @@
 import socket
-import signal
+import selectors
 import threading
 
 import module.database as db
@@ -7,7 +7,7 @@ import module.encoder as en
 
 HOST = ''
 PORT = 9150
-MODE = [0,1,2]
+sel = selectors.DefaultSelector()
 
 
 code_list = db.fileReader()
@@ -45,7 +45,6 @@ def download(conn,id):
     print(f'user{id}: 다운로드')
 
     setDate = conn.recv(1024).decode('utf-8')
-    
     if setDate in list(code_list['old'].keys()):
         dataList = code_list['old'][setDate]
         codes = len(dataList)
@@ -54,46 +53,55 @@ def download(conn,id):
         codes =  len(dataList)
     
     conn.sendall(str(codes).encode('utf-8'))
-        
+    print(f"user{id}: 암호 접속:{setDate}")
+    
     index = conn.recv(1024).decode('utf-8')
     
     conn.sendall(f"{dataList[int(index)]}".encode('utf-8'))
-    print(f"user{id}: 다운로드 {dataList[int(index)]}")
+    print(f"user{id}: 다운로드 암호:{dataList[int(index)]}")
     
-def runClient(conn,id):
-    print(f"user{id}가 접속하였습니다.")
-    while True:
-        code_list = db.fileReader()
-        new = code_list['new']
-        
-        try:
-            code = conn.recv(1024).decode('utf-8')
-        except ConnectionResetError:
+def run(conn):
+    id =ids.index(conn)
+    
+    code_list = db.fileReader()
+    new = code_list['new']
+    
+    try:
+        code = conn.recv(1024).decode('utf-8')
+    
+    except ConnectionResetError:
             print(f'user{id}가 강제로 종료되었습니다.')
-            break
-        else:
-            if code == '0' or code == '종료':
-                print(f'user{id} 종료')
-                break
-                
-            elif code == '1' or code == '업로드':
-                t= threading.Thread(target=upload,args=(conn,id))
-                t.daemon = True
-                t.start()
-                t.join()
-                
-            elif code == '2' or code == '다운로드':
-                t= threading.Thread(target=download,args=(conn,id))
-                t.daemon = True
-                t.start()
-                t.join()
-
-    if conn in ids:
-        ids.remove(conn)
+    
+    if code == '0' or code == '종료':
+        print(f'user{id} 종료')
         
-    conn.close()
-    db.fileWriter(new['value'])
-    print(f'데이터 저장...')
+        if conn in ids:
+            ids.remove(conn)
+        
+        sel.unregister(conn)
+        conn.close()
+    
+        db.fileWriter(new['value'])
+        print(f'데이터 저장...')
+        
+    elif code == '1' or code == '업로드':
+        t= threading.Thread(target=upload,args=(conn,id))
+        t.daemon = True
+        t.start()
+                
+    elif code == '2' or code == '다운로드':
+        t= threading.Thread(target=download,args=(conn,id))
+        t.daemon = True
+        t.start()
+                
+
+    
+def serv(socket):
+    conn,addr = socket.accept()
+    sel.register(conn,selectors.EVENT_READ, run)
+    ids.append(conn)
+    print(f"user{ids.index(conn)}가 접속하였습니다.")
+
 
 def main():
     
@@ -102,20 +110,22 @@ def main():
         s.bind((HOST, PORT))
         s.listen(5)
         print('서버가 시작되었습니다.')
-
+        sel.register(s, selectors.EVENT_READ,serv)
+        
+        con = True
+        
         while True:
-            conn,addr = s.accept()
-            ids.append(conn)
-            id = len(ids)-1
-            t= threading.Thread(target=runClient,args=(conn,id))
-            t.daemon = True
-            t.start()
-            
-            t.join()
-            
-            if(len(ids)==0):
-                print('서버를 종료합니다.')
+            if(len(ids)==0 and con == False):
                 break
+            events = sel.select()
+            for key, mask in events:
+                callback = key.data
+                callback(key.fileobj)
+                con = False
+
+        sel.unregister(s)
+        s.close()
+        print("서버를 종료합니다.")
 
 if __name__ == "__main__":
     main()
