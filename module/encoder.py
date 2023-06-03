@@ -11,7 +11,7 @@ ref  = list('.RGEDYCUXZTSNMV WBLKHOQIFJPA')
 def setting(key=False,plugNum=False):
     #table 세팅
     tables = list()
-    f = open('./tables.txt','r')
+    f = open('./database/tables.txt','r')
     
 
     while(True):
