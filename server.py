@@ -59,7 +59,7 @@ def download(conn,id):
     
     conn.sendall(f"{dataList[int(index)]}".encode('utf-8'))
     print(f"user{id}: 다운로드 암호:{dataList[int(index)]}")
-    
+
 def run(conn):
     id =ids.index(conn)
     
@@ -88,12 +88,11 @@ def run(conn):
         t= threading.Thread(target=upload,args=(conn,id))
         t.daemon = True
         t.start()
-                
+
     elif code == '2' or code == '다운로드':
         t= threading.Thread(target=download,args=(conn,id))
         t.daemon = True
         t.start()
-                
 
     
 def serv(socket):
@@ -101,7 +100,6 @@ def serv(socket):
     sel.register(conn,selectors.EVENT_READ, run)
     ids.append(conn)
     print(f"user{ids.index(conn)}가 접속하였습니다.")
-
 
 def main():
     
@@ -124,7 +122,6 @@ def main():
                 con = False
 
         sel.unregister(s)
-        s.close()
         print("서버를 종료합니다.")
 
 if __name__ == "__main__":

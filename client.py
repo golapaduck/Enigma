@@ -2,6 +2,7 @@ import socket
 
 HOST = 'localhost'
 PORT = 9150
+
 # 업로드
 def upload():
     while True:
@@ -19,6 +20,7 @@ def upload():
 
     print(f'암호:{txt[0]}')
     print(f'키:{txt[1]}')
+    
 # 다운로드(data는 서버에서 받은 암호 개수)
 def download(data):
     if data == list():
@@ -26,7 +28,6 @@ def download(data):
         return
 
     print('서버)다운로드합니다.')
-
 
     print('-------------암호--------------')
     dateList = list(data.split('/'))
@@ -43,7 +44,6 @@ def download(data):
         else:
             print("다시 입력해주세요.")
             continue
-
     s.sendall(setDate.encode('utf-8'))
     print('---------------------------')
     
@@ -54,7 +54,7 @@ def download(data):
     print('---------------------------')
     while True:
         index = int(input('입력:'))
-        if(index <= int(codes)):
+        if(0< index <= int(codes)):
             index -= 1
             break
         else:
@@ -80,15 +80,15 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         msg = input('입력: ')
         print('---------------------------')
 
-
-        s.sendall(msg.encode('utf-8'))
         
         if msg == "0":
+            s.sendall(msg.encode('utf-8'))
             print('서버)종료합니다.')
             print('---------------------------')
             break
             
         elif msg == "1":
+            s.sendall(msg.encode('utf-8'))
             print('서버)업로드합니다.')
             print('문장을 입력하세요. ')
             print('---------------------------')
@@ -96,6 +96,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             continue
 
         elif msg == "2":
+            s.sendall(msg.encode('utf-8'))
             data = s.recv(1024)
             download(data.decode('utf-8'))
             continue
@@ -103,4 +104,3 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         else:
             print('다시 입력해주세요.')
             continue
-    
