@@ -1,6 +1,9 @@
-ENIGMA 서버/클라이언트
 ------------------------------
+## 데모 영상
 
+https://github.com/golapaduck/Enigma/assets/73866752/08573d14-cd97-4875-9863-ba7968c0fe64
+
+------------------------------
 ## 소프트웨어 설계
 ![설계도](https://github.com/golapaduck/Enigma/assets/73866752/f53fd400-0db3-4bcd-b629-cca36d88d094)
 
